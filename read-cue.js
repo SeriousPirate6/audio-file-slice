@@ -38,13 +38,35 @@ module.exports = {
             genre: metadata.genre,
             artist: cueData.performer,
             track_number: i + 1,
-            start_time: track.indexes[0].time,
+            start_time:
+              track.indexes[0].time.min < 60
+                ? track.indexes[0].time
+                : (() => {
+                    const start_time = track.indexes[0].time;
+                    const hour = Math.floor(start_time.min / 60);
+
+                    return {
+                      hour,
+                      min:
+                        start_time.min < 60
+                          ? start_time.min
+                          : start_time.min - hour * 60,
+                      sec: start_time.sec,
+                      frame: start_time.frame,
+                    };
+                  })(),
             end_time: cueData.files[0].tracks[i + 1] // only applicable if the track isn't the last one
               ? (() => {
                   const song_duration =
                     cueData.files[0].tracks[i + 1].indexes[0].time;
+                  const hour = Math.floor(song_duration.min / 60);
+
                   return {
-                    min: song_duration.min,
+                    hour,
+                    min:
+                      song_duration.min < 60
+                        ? song_duration.min
+                        : song_duration.min - hour * 60,
                     sec: song_duration.sec,
                     frame: song_duration.frame,
                   };
@@ -58,6 +80,8 @@ module.exports = {
                   const song_duration = moment
                     .duration(
                       `00:${next_song_start.min}:${next_song_start.sec}.${next_song_start.frame}`
+                      // setting hour at 0 because in .cue files they are never used.
+                      // the minutes can be setted further than 59.
                     )
                     .subtract(
                       moment.duration(
@@ -66,6 +90,7 @@ module.exports = {
                     );
 
                   return {
+                    hour: song_duration.hours(),
                     min: song_duration.minutes(),
                     sec: song_duration.seconds(),
                     frame: Math.floor(song_duration.milliseconds() / 10),
@@ -74,7 +99,7 @@ module.exports = {
               : (() => {
                   const song_duration = moment
                     .duration(
-                      `00:${total_duration.min}:${total_duration.sec}.${total_duration.frame}`
+                      `${total_duration.hour}:${total_duration.min}:${total_duration.sec}.${total_duration.frame}`
                     )
                     .subtract(
                       moment.duration(
@@ -83,6 +108,7 @@ module.exports = {
                     );
 
                   return {
+                    hour: song_duration.hours(),
                     min: song_duration.minutes(),
                     sec: song_duration.seconds(),
                     frame: Math.floor(song_duration.milliseconds() / 10),

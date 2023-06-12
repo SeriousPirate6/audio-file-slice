@@ -13,6 +13,6 @@ const { getTrackDuration } = require("./track-duration");
   sliceAndTag({
     inputPath: trackFilePath,
     outputFolder: "test",
-    metadata: metadata.tracks[0],
+    metadata: metadata.tracks[9],
   });
 })();

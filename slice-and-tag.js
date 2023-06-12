@@ -1,15 +1,20 @@
+const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
 
 module.exports = {
   sliceAndTag: ({ inputPath, outputFolder, metadata }) => {
     ffmpeg(inputPath)
-      .setStartTime(`00:${metadata.start_time.min}:${metadata.start_time.sec}`)
-      .setDuration(`00:${metadata.duration.min}:${metadata.duration.sec}`)
+      .setStartTime(
+        `${metadata.start_time.hour}:${metadata.start_time.min}:${metadata.start_time.sec}`
+      )
+      .setDuration(
+        `${metadata.duration.hour}:${metadata.duration.min}:${metadata.duration.sec}`
+      )
       .outputOptions([
         "-metadata",
         `title=${
           metadata.title.indexOf(" ") !== -1
-            ? metadata.title + " "
+            ? metadata.title + " " // trailing space to avoid crash in case of name with spaces in between
             : metadata.title
         }`,
         "-metadata",
@@ -42,7 +47,7 @@ module.exports = {
           metadata.track_number <= 9
             ? "0" + metadata.track_number
             : metadata.track_number
-        }. ${metadata.artist} - ${metadata.title}.flac`
+        }. ${metadata.artist} - ${metadata.title}${path.extname(inputPath)}`
       )
       .on("end", function () {
         console.log("Slicing complete");
