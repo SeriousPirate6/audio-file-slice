@@ -2,9 +2,13 @@ const fs = require("fs");
 const cueParser = require("./cue-parser/cue");
 const constants = require("./constants/constants");
 const moment = require("moment");
+const { getTechnicalData } = require("./track-technical-data");
 
 module.exports = {
-  readCue: async ({ cueFilePath, total_duration }) => {
+  readCue: async ({ cueFilePath, audioFilePath }) => {
+    const technical_info = await getTechnicalData(audioFilePath);
+    const total_duration = technical_info.formatted_duration;
+
     return new Promise(function (resolve, reject) {
       fs.readFile(cueFilePath, "utf8", (err) => {
         if (err) {
@@ -28,6 +32,7 @@ module.exports = {
             metadata.year = prop.replace(date, "").replaceAll('"', "").trim();
         });
 
+        metadata.technical_info = technical_info;
         metadata.tracks = [];
 
         cueData.files[0].tracks.forEach((track, i) => {
@@ -40,7 +45,14 @@ module.exports = {
             track_number: i + 1,
             start_time:
               track.indexes[0].time.min < 60
-                ? track.indexes[0].time
+                ? (() => {
+                    return {
+                      hour: 0,
+                      min: track.indexes[0].time.min,
+                      sec: track.indexes[0].time.sec,
+                      frame: track.indexes[0].time.frame,
+                    };
+                  })()
                 : (() => {
                     const start_time = track.indexes[0].time;
                     const hour = Math.floor(start_time.min / 60);
@@ -114,6 +126,7 @@ module.exports = {
                     frame: Math.floor(song_duration.milliseconds() / 10),
                   };
                 })(),
+            technical_info,
           });
         });
 

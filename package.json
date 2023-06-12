@@ -11,8 +11,8 @@
   "dependencies": {
     "chardet": "^1.5.1",
     "ffmpeg": "^0.0.4",
+    "ffprobe": "^1.1.2",
     "fluent-ffmpeg": "^2.1.2",
-    "get-audio-duration": "^4.0.0",
     "moment": "^2.29.4"
   }
 }

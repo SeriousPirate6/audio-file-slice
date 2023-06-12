@@ -1,18 +1,27 @@
 const { readCue } = require("./read-cue");
 const { sliceAndTag } = require("./slice-and-tag");
-const { getTrackDuration } = require("./track-duration");
+const { tagCoverImage } = require("./tag-cover");
+const { getTechnicalData } = require("./track-technical-data");
 
 (async () => {
   const cueFilePath = "test/coal.cue";
-  const trackFilePath = "test/coal.flac";
-  const coverFilePath = "test/cover.jpg";
+  const audioFilePath = "test/coal.flac";
 
-  const total_duration = await getTrackDuration(trackFilePath);
-  const metadata = await readCue({ cueFilePath, total_duration });
+  const coverFilePath =
+    "C:\\Users\\Pirat\\Proj\\audio-file-slice\\test\\cover.jpg";
 
-  sliceAndTag({
-    inputPath: trackFilePath,
-    outputFolder: "test",
-    metadata: metadata.tracks[9],
-  });
+  const total_metadata = await readCue({ cueFilePath, audioFilePath });
+
+  for await (metadata of total_metadata.tracks) {
+    const audioPath = await sliceAndTag({
+      inputPath: audioFilePath,
+      outputFolder: "test",
+      metadata,
+    });
+
+    await tagCoverImage({
+      imagePath: coverFilePath,
+      audioPath: `../${audioPath}`,
+    });
+  }
 })();
