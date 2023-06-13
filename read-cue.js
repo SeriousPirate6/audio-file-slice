@@ -39,7 +39,7 @@ module.exports = {
           metadata.tracks.push({
             title: track.title,
             album: cueData.title,
-            year: metadata.year,
+            year: Number(metadata.year),
             genre: metadata.genre,
             artist: cueData.performer,
             track_number: i + 1,

@@ -58,11 +58,9 @@ module.exports = {
               : metadata.genre
           }`,
           "-metadata",
-          `year=${
-            metadata.year.indexOf(" ") !== -1
-              ? metadata.year + " "
-              : metadata.year
-          }`,
+          `track=${metadata.track_number}`,
+          "-metadata",
+          `year=${metadata.year}`,
         ])
         .output(`${full_path}/${file_name}`)
         .on("end", function () {
