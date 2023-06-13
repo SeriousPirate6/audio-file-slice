@@ -1,12 +1,11 @@
+const path = require("path");
 const { readCue } = require("./read-cue");
 const { sliceAndTag } = require("./slice-and-tag");
 const { tagCoverImage } = require("./tag-cover");
-const { getTechnicalData } = require("./track-technical-data");
 const { listFilesRecursively } = require("./recursive-file-searching");
 
 (async () => {
-  const folder_path =
-    "E:\\Pirat\\Music\\Leprous [Vinyl]\\2015 - The Congregation";
+  const folder_path = process.argv[2];
 
   const all_files = listFilesRecursively({ folder_path });
 
@@ -40,13 +39,13 @@ const { listFilesRecursively } = require("./recursive-file-searching");
   for await (metadata of total_metadata.tracks) {
     const audioPath = await sliceAndTag({
       inputPath: audioFile.file_path,
-      outputFolder: "test",
+      outputFolder: path.dirname(folder_path), // using the subfolder's path as output
       metadata,
     });
 
     await tagCoverImage({
       imagePath: coverFile.file_path,
-      audioPath: `../${audioPath}`,
+      audioPath,
     });
   }
 })();

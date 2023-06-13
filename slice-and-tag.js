@@ -1,16 +1,19 @@
 const fs = require("fs");
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
+const { stringSanitizer } = require("./string-sanitizer");
 
 module.exports = {
   sliceAndTag: async ({ inputPath, outputFolder, metadata }) => {
     const tech_data = metadata.technical_info;
 
-    const sub_folder = `${metadata.artist} - ${metadata.album} (${
-      metadata.year
-    }) [${tech_data.bits_per_raw_sample}bits-${Math.floor(
-      tech_data.sample_rate / 1000
-    )}kHz] ${tech_data.codec_name.toUpperCase()}`;
+    const sub_folder = stringSanitizer(
+      `${metadata.artist} - ${metadata.album} (${metadata.year}) [${
+        tech_data.bits_per_raw_sample
+      }bits-${Math.floor(
+        tech_data.sample_rate / 1000
+      )}kHz] ${tech_data.codec_name.toUpperCase()}`
+    );
 
     const full_path = `${outputFolder}/${sub_folder}`;
 
@@ -18,11 +21,13 @@ module.exports = {
       fs.mkdirSync(full_path);
     }
 
-    const file_name = `${
-      metadata.track_number <= 9
-        ? "0" + metadata.track_number
-        : metadata.track_number
-    }. ${metadata.artist} - ${metadata.title}${path.extname(inputPath)}`;
+    const file_name = stringSanitizer(
+      `${
+        metadata.track_number <= 9
+          ? "0" + metadata.track_number
+          : metadata.track_number
+      }. ${metadata.artist} - ${metadata.title}${path.extname(inputPath)}`
+    );
 
     return new Promise((resolve, reject) => {
       ffmpeg(inputPath)
