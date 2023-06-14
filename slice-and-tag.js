@@ -69,7 +69,7 @@ module.exports = {
         ])
         .output(`${full_path}/${file_name}`)
         .on("end", function () {
-          console.log("Slicing complete: ", file_name);
+          console.log(`Slicing complete for file: '${file_name}'`);
           resolve(`${full_path}/${file_name}`);
         })
         .on("error", function (err) {

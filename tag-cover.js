@@ -1,3 +1,4 @@
+const path = require("path");
 const { exec } = require("child_process");
 const constants = require("./constants/constants");
 
@@ -18,7 +19,11 @@ module.exports = {
             );
           } else {
             resolve(
-              console.log("Thumbnail added to the FLAC file successfully.")
+              console.log(
+                `Thumbnail added successfully for: '${path.basename(
+                  audioPath
+                )}'`
+              )
             );
           }
         }
