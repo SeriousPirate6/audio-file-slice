@@ -17,11 +17,13 @@ module.exports = Object.freeze({
         ("YourFolder" must contains:
           1x .flac file;
           1x .cue file;
-          1x .jpg / .jpeg / .png file.)\n\n
+          1x .jpg / .jpeg / .png file
+            (the name must be one of the following: "album", "cover", "folder", "front").\n\n
       adding cover image only:  -c "C:\\YourFolder"\n
         ("YourFolder" must contains:
           Nx .flac file(s);
-          1x .jpg / .jpeg / .png file.)
+          1x .jpg / .jpeg / .png file
+            (the name must be one of the following: "album", "cover", "folder", "front").
       \n`,
   INVALID_COMMAND: "Command provided not valid. Use -h for help.",
 });
