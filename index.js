@@ -1,9 +1,12 @@
+require("dotenv").config();
 const path = require("path");
 const { readCue } = require("./read-cue");
-const { sliceAndTag } = require("./slice-and-tag");
 const { tagCoverImage } = require("./tag-cover");
-const { listFilesRecursively } = require("./recursive-file-searching");
 const constants = require("./constants/constants");
+const { sliceAndTag } = require("./slice-and-tag");
+const { listFilesRecursively } = require("./recursive-file-searching");
+const { getImageFromTrack } = require("./spotify/get-image-from-response");
+const { downloadImage } = require("./utils/download");
 
 (async () => {
   const command = process.argv[2].toLowerCase();
@@ -19,7 +22,7 @@ const constants = require("./constants/constants");
       const all_files = listFilesRecursively({ folder_path });
 
       const audioFiles = all_files.filter((e) => e.file_extension === ".flac");
-      const coverFile = all_files.find(
+      let coverImage = all_files.find(
         (e) =>
           (e.file_extension === ".png" ||
             e.file_extension === ".jpg" ||
@@ -35,22 +38,25 @@ const constants = require("./constants/constants");
         console.log("Files .flac not found.");
         return;
       }
-      if (coverFile === undefined) {
-        console.log("File .png / .jpg / .jpeg not found.");
-        return;
+      if (coverImage === undefined) {
+        console.log("Cover image not found, downloading it...");
+
+        const imageUrl = await getImageFromTrack(audioFiles[0].file_path);
+
+        coverImage = await downloadImage({
+          fileUrl: imageUrl,
+          downloadPath: folder_path,
+        });
       }
 
       for await (track of audioFiles) {
         await tagCoverImage({
-          imagePath: coverFile.file_path,
+          imagePath: coverImage.file_path ? coverImage.file_path : coverImage,
           audioPath: track.file_path,
         });
       }
       return;
     }
-
-    // TODO possible future implementation:
-    // searching for info and cover image of the album from an API service.
 
     case constants.COMMAND_SLICE_TAG_COVER: {
       const all_files = listFilesRecursively({ folder_path });
