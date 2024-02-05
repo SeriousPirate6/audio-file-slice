@@ -3,8 +3,8 @@ const { exec } = require("child_process");
 const constants = require("./constants/constants");
 
 module.exports = {
-  tagCoverImage: async ({ imagePath, audioPath }) => {
-    const command = `metaflac --import-picture-from="${imagePath}" "${audioPath}"`;
+  tagCoverImage: async ({ coverImage, audioPath }) => {
+    const command = `metaflac --import-picture-from="${coverImage}" "${audioPath}"`;
 
     return new Promise((resolve, reject) => {
       exec(

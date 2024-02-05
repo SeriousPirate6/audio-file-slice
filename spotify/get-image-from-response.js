@@ -5,9 +5,9 @@ const { getArtistAlbumByName } = require("./get-artist-album-by-name");
 module.exports = {
   getImageFromTrack: async (filePath) => {
     /* fetching the metadata of the track */
-    const { ALBUM, ARTIST } = await metadataFromTrack(filePath);
+    const { ALBUM, ARTIST, album, artist } = await metadataFromTrack(filePath);
 
-    if (!ALBUM || !ARTIST) {
+    if ((!ALBUM || !ARTIST) && (!album || !artist)) {
       console.log("The track does not contains sufficient metadata.");
       return;
     }
@@ -18,8 +18,8 @@ module.exports = {
     /* fetching Spotify API for album and artists of the track */
     const response = await getArtistAlbumByName({
       access_token,
-      album: ALBUM,
-      artist: ARTIST,
+      album: ALBUM ? ALBUM : album,
+      artist: ARTIST ? ARTIST : artist,
     });
 
     /* returning the url of the cover image of the album */

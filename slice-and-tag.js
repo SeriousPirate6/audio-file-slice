@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
-const { stringSanitizer } = require("./string-sanitizer");
+const { stringSanitizer } = require("./utils/string-sanitizer");
 
 module.exports = {
   sliceAndTag: async ({ inputPath, outputFolder, metadata }) => {
