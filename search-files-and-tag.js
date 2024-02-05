@@ -6,7 +6,7 @@ module.exports = {
   searchTracksAndCover: async (folder_path) => {
     const all_files = listFilesRecursively({ folder_path });
 
-    const cueFile = all_files.find((e) => e.extension === ".cue");
+    const cueFile = all_files.find((e) => e.file_extension === ".cue");
     const audioFiles = all_files.filter((e) => e.file_extension === ".flac");
     let coverImage = all_files.find(
       (e) =>
@@ -27,7 +27,10 @@ module.exports = {
     if (coverImage === undefined) {
       console.log("Cover image not found, downloading it...");
 
-      const imageUrl = await getImageFromTrack(audioFiles[0].file_path);
+      const imageUrl = await getImageFromTrack({
+        filePath: audioFiles[0].file_path,
+        cueFilePath: cueFile.file_path,
+      });
 
       if (!imageUrl) return;
 

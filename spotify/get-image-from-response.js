@@ -1,15 +1,23 @@
+const cueParser = require("../cue-parser/cue");
 const { metadataFromTrack } = require("../metadata-from-track");
 const { getSpotifyAccessToken } = require("./get-access-token");
 const { getArtistAlbumByName } = require("./get-artist-album-by-name");
 
 module.exports = {
-  getImageFromTrack: async (filePath) => {
+  getImageFromTrack: async ({ filePath, cueFilePath }) => {
     /* fetching the metadata of the track */
-    const { ALBUM, ARTIST, album, artist } = await metadataFromTrack(filePath);
+    let { ALBUM, ARTIST, album, artist } = await metadataFromTrack(filePath);
 
     if ((!ALBUM || !ARTIST) && (!album || !artist)) {
-      console.log("The track does not contains sufficient metadata.");
-      return;
+      if (!cueFilePath) {
+        console.log("The track does not contains sufficient metadata.");
+        return;
+      }
+
+      /* reading album and artist from .cue file, if provided */
+      const cueData = cueParser.parse(cueFilePath);
+      album = cueData.title;
+      artist = cueData.performer;
     }
 
     /* requesting Spotify access token */

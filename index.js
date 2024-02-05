@@ -52,19 +52,21 @@ const { searchTracksAndCover } = require("./search-files-and-tag");
         return;
       }
 
-      const total_metadata = await readCue({
-        cueFilePath: cueFile.file_path,
-        audioFilePath: audioFiles.file_path,
-      });
-
-      for await (metadata of total_metadata.tracks) {
-        const audioPath = await sliceAndTag({
-          inputPath: audioFiles.file_path,
-          outputFolder: path.dirname(folder_path), // using the subfolder's path as output
-          metadata,
+      for await (track of audioFiles) {
+        const total_metadata = await readCue({
+          cueFilePath: cueFile.file_path,
+          audioFile: track,
         });
 
-        await tagCoverImage({ coverImage, audioPath });
+        for await (metadata of total_metadata.tracks) {
+          const audioPath = await sliceAndTag({
+            inputPath: track.file_path,
+            outputFolder: path.dirname(folder_path), // using the subfolder's path as output
+            metadata,
+          });
+
+          await tagCoverImage({ coverImage, audioPath });
+        }
       }
 
       // renaming the folder to force the player to reload it
