@@ -35,102 +35,103 @@ module.exports = {
         metadata.technical_info = technical_info;
         metadata.tracks = [];
 
-        cueData.files
-          .find((file) => file.name === audioFile.complete_file_name)
-          .tracks.forEach((track, i) => {
-            metadata.tracks.push({
-              title: track.title,
-              album: cueData.title,
-              year: Number(metadata.year),
-              genre: metadata.genre,
-              artist: cueData.performer,
-              track_number: track.number,
-              start_time:
-                track.indexes[0].time.min < 60
-                  ? (() => {
-                      return {
-                        hour: 0,
-                        min: track.indexes[0].time.min,
-                        sec: track.indexes[0].time.sec,
-                        frame: track.indexes[0].time.frame,
-                      };
-                    })()
-                  : (() => {
-                      const start_time = track.indexes[0].time;
-                      const hour = Math.floor(start_time.min / 60);
+        /* fetching the file corresponding to the track title */
+        const file = cueData.files.find(
+          (file) => file.name === audioFile.complete_file_name
+        );
 
-                      return {
-                        hour,
-                        min:
-                          start_time.min < 60
-                            ? start_time.min
-                            : start_time.min - hour * 60,
-                        sec: start_time.sec,
-                        frame: start_time.frame,
-                      };
-                    })(),
-              end_time: cueData.files[0].tracks[i + 1] // only applicable if the track isn't the last one
+        file.tracks.forEach((track, i) => {
+          metadata.tracks.push({
+            title: track.title,
+            album: cueData.title,
+            year: Number(metadata.year),
+            genre: metadata.genre,
+            artist: cueData.performer,
+            track_number: track.number,
+            start_time:
+              track.indexes[0].time.min < 60
                 ? (() => {
-                    const song_duration =
-                      cueData.files[0].tracks[i + 1].indexes[0].time;
-                    const hour = Math.floor(song_duration.min / 60);
+                    return {
+                      hour: 0,
+                      min: track.indexes[0].time.min,
+                      sec: track.indexes[0].time.sec,
+                      frame: track.indexes[0].time.frame,
+                    };
+                  })()
+                : (() => {
+                    const start_time = track.indexes[0].time;
+                    const hour = Math.floor(start_time.min / 60);
 
                     return {
                       hour,
                       min:
-                        song_duration.min < 60
-                          ? song_duration.min
-                          : song_duration.min - hour * 60,
-                      sec: song_duration.sec,
-                      frame: song_duration.frame,
-                    };
-                  })()
-                : total_duration,
-              duration: cueData.files[0].tracks[i + 1]
-                ? (() => {
-                    const next_song_start =
-                      cueData.files[0].tracks[i + 1].indexes[0].time;
-
-                    const song_duration = moment
-                      .duration(
-                        `00:${next_song_start.min}:${next_song_start.sec}.${next_song_start.frame}`
-                        // setting hour at 0 because in .cue files they are never used.
-                        // the minutes can be setted further than 59.
-                      )
-                      .subtract(
-                        moment.duration(
-                          `00:${track.indexes[0].time.min}:${track.indexes[0].time.sec}.${track.indexes[0].time.frame}`
-                        )
-                      );
-
-                    return {
-                      hour: song_duration.hours(),
-                      min: song_duration.minutes(),
-                      sec: song_duration.seconds(),
-                      frame: Math.floor(song_duration.milliseconds() / 10),
-                    };
-                  })()
-                : (() => {
-                    const song_duration = moment
-                      .duration(
-                        `${total_duration.hour}:${total_duration.min}:${total_duration.sec}.${total_duration.frame}`
-                      )
-                      .subtract(
-                        moment.duration(
-                          `00:${track.indexes[0].time.min}:${track.indexes[0].time.sec}.${track.indexes[0].time.frame}`
-                        )
-                      );
-
-                    return {
-                      hour: song_duration.hours(),
-                      min: song_duration.minutes(),
-                      sec: song_duration.seconds(),
-                      frame: Math.floor(song_duration.milliseconds() / 10),
+                        start_time.min < 60
+                          ? start_time.min
+                          : start_time.min - hour * 60,
+                      sec: start_time.sec,
+                      frame: start_time.frame,
                     };
                   })(),
-              technical_info,
-            });
+            end_time: file.tracks[i + 1] // only applicable if the track isn't the last one
+              ? (() => {
+                  const song_duration = file.tracks[i + 1].indexes[0].time;
+                  const hour = Math.floor(song_duration.min / 60);
+
+                  return {
+                    hour,
+                    min:
+                      song_duration.min < 60
+                        ? song_duration.min
+                        : song_duration.min - hour * 60,
+                    sec: song_duration.sec,
+                    frame: song_duration.frame,
+                  };
+                })()
+              : total_duration,
+            duration: file.tracks[i + 1]
+              ? (() => {
+                  const next_song_start = file.tracks[i + 1].indexes[0].time;
+
+                  const song_duration = moment
+                    .duration(
+                      `00:${next_song_start.min}:${next_song_start.sec}.${next_song_start.frame}`
+                      // setting hour at 0 because in .cue files they are never used.
+                      // the minutes can be setted further than 59.
+                    )
+                    .subtract(
+                      moment.duration(
+                        `00:${track.indexes[0].time.min}:${track.indexes[0].time.sec}.${track.indexes[0].time.frame}`
+                      )
+                    );
+
+                  return {
+                    hour: song_duration.hours(),
+                    min: song_duration.minutes(),
+                    sec: song_duration.seconds(),
+                    frame: Math.floor(song_duration.milliseconds() / 10),
+                  };
+                })()
+              : (() => {
+                  const song_duration = moment
+                    .duration(
+                      `${total_duration.hour}:${total_duration.min}:${total_duration.sec}.${total_duration.frame}`
+                    )
+                    .subtract(
+                      moment.duration(
+                        `00:${track.indexes[0].time.min}:${track.indexes[0].time.sec}.${track.indexes[0].time.frame}`
+                      )
+                    );
+
+                  return {
+                    hour: song_duration.hours(),
+                    min: song_duration.minutes(),
+                    sec: song_duration.seconds(),
+                    frame: Math.floor(song_duration.milliseconds() / 10),
+                  };
+                })(),
+            technical_info,
           });
+        });
 
         console.log(metadata);
 
