@@ -26,4 +26,8 @@ module.exports = Object.freeze({
             (the name must be one of the following: "album", "cover", "folder", "front").
       \n`,
   INVALID_COMMAND: "Command provided not valid. Use -h for help.",
+
+  // URLS
+  SPOTIFY_API_URL: "https://api.spotify.com/v1",
+  SPOTIFY_AUTHENTICATION_URL: "https://accounts.spotify.com/api/token",
 });

@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { SPOTIFY_API_URL } = require("../constants/constants");
 
 module.exports = {
   search: async ({ access_token, query, type, limit = 1 }) => {
@@ -6,7 +7,7 @@ module.exports = {
       const config = {
         method: "get",
         maxBodyLength: Infinity,
-        url: `${process.env.SPOTIFY_API_URL}/search?q=${query}&type=${type}&limit=${limit}`,
+        url: `${SPOTIFY_API_URL}/search?q=${query}&type=${type}&limit=${limit}`,
         headers: {
           Authorization: `Bearer ${access_token}`,
         },

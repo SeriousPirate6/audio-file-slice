@@ -1,5 +1,6 @@
 const qs = require("qs");
 const axios = require("axios");
+const { SPOTIFY_AUTHENTICATION_URL } = require("../constants/constants");
 
 module.exports = {
   getSpotifyAccessToken: async () => {
@@ -13,7 +14,7 @@ module.exports = {
       const config = {
         method: "post",
         maxBodyLength: Infinity,
-        url: process.env.SPOTIFY_AUTHENTICATION_URL,
+        url: SPOTIFY_AUTHENTICATION_URL,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
