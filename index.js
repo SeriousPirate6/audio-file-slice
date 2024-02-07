@@ -1,10 +1,12 @@
+const fs = require("fs");
 require("dotenv").config();
 const path = require("path");
 const { readCue } = require("./read-cue");
 const { tagCoverImage } = require("./tag-cover");
 const constants = require("./constants/constants");
 const { sliceAndTag } = require("./slice-and-tag");
-const { renameFolder } = require("./utils/rename-folder");
+const { renameFolder, moveFile } = require("./utils/files");
+const { stringSanitizer } = require("./utils/string-sanitizer");
 const { searchTracksAndCover } = require("./search-files-and-tag");
 
 (async () => {
@@ -52,16 +54,38 @@ const { searchTracksAndCover } = require("./search-files-and-tag");
         return;
       }
 
+      let outputPath = path.dirname(folder_path);
+
       for await (track of audioFiles) {
-        const total_metadata = await readCue({
+        const full_metadata = await readCue({
           cueFilePath: cueFile.file_path,
           audioFile: track,
         });
 
-        for await (metadata of total_metadata.tracks) {
+        // TODO extract to an external function create subfolder logic;
+        // create a new "lighter" version of read cue that fetches only the album's property;
+
+        // fetching general album's metatada from the first track
+        const tech_data = full_metadata.tracks[0].technical_info;
+
+        const sub_folder = stringSanitizer(
+          `${full_metadata.artist} - ${full_metadata.album} (${
+            full_metadata.year
+          }) [${tech_data.bits_per_raw_sample}bits-${Math.floor(
+            tech_data.sample_rate / 1000
+          )}kHz] ${tech_data.codec_name.toUpperCase()}`
+        );
+
+        outputPath += `/${sub_folder}`; // using the subfolder's path as output
+
+        if (!fs.existsSync(outputPath)) {
+          fs.mkdirSync(outputPath);
+        }
+
+        for await (metadata of full_metadata.tracks) {
           const audioPath = await sliceAndTag({
             inputPath: track.file_path,
-            outputFolder: path.dirname(folder_path), // using the subfolder's path as output
+            outputPath,
             metadata,
           });
 
@@ -69,8 +93,11 @@ const { searchTracksAndCover } = require("./search-files-and-tag");
         }
       }
 
-      // renaming the folder to force the player to reload it
-      await renameFolder({ oldPath: folder_path, newPath: folder_path + "-" });
+      // moving the cover image to the new directory
+      await moveFile({
+        oldPath: coverImage,
+        newPath: `${outputPath}/folder.jpeg`,
+      });
 
       return;
     }

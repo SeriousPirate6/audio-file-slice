@@ -4,23 +4,7 @@ const ffmpeg = require("fluent-ffmpeg");
 const { stringSanitizer } = require("./utils/string-sanitizer");
 
 module.exports = {
-  sliceAndTag: async ({ inputPath, outputFolder, metadata }) => {
-    const tech_data = metadata.technical_info;
-
-    const sub_folder = stringSanitizer(
-      `${metadata.artist} - ${metadata.album} (${metadata.year}) [${
-        tech_data.bits_per_raw_sample
-      }bits-${Math.floor(
-        tech_data.sample_rate / 1000
-      )}kHz] ${tech_data.codec_name.toUpperCase()}`
-    );
-
-    const full_path = `${outputFolder}/${sub_folder}`;
-
-    if (!fs.existsSync(full_path)) {
-      fs.mkdirSync(full_path);
-    }
-
+  sliceAndTag: async ({ inputPath, outputPath, metadata }) => {
     const file_name = stringSanitizer(
       `${
         metadata.track_number <= 9
@@ -67,10 +51,10 @@ module.exports = {
           "-metadata",
           `year=${metadata.year}`,
         ])
-        .output(`${full_path}/${file_name}`)
+        .output(`${outputPath}/${file_name}`)
         .on("end", function () {
           console.log(`Slicing complete for file: '${file_name}'`);
-          resolve(`${full_path}/${file_name}`);
+          resolve(`${outputPath}/${file_name}`);
         })
         .on("error", function (err) {
           reject(console.error("An error occurred:", err.message));

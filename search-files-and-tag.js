@@ -1,5 +1,5 @@
 const { downloadImage } = require("./utils/download");
-const { listFilesRecursively } = require("./utils/recursive-file-searching");
+const { listFilesRecursively } = require("./utils/files");
 const { getImageFromTrack } = require("./spotify/get-image-from-response");
 
 module.exports = {

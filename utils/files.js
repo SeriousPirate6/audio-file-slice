@@ -38,4 +38,44 @@ module.exports = {
       console.error(err);
     }
   }),
+
+  renameFolder: async ({ oldPath, newPath }) => {
+    return new Promise((resolve, reject) => {
+      fs.rename(oldPath, newPath, (err) => {
+        if (err) {
+          console.error("Error renaming folder:", err);
+          reject();
+        } else {
+          console.log("Folder renamed successfully.");
+          resolve();
+        }
+      });
+    });
+  },
+
+  moveFile: async ({ oldPath, newPath }) => {
+    if (!fs.lstatSync(oldPath).isFile()) {
+      console.log("Both path must represents files");
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      fs.copyFile(oldPath, newPath, (err) => {
+        if (err) {
+          console.error("Error copying file:", err);
+          return;
+        }
+
+        fs.unlink(oldPath, (err) => {
+          if (err) {
+            console.error("Error deleting original file:", err);
+            reject();
+          }
+
+          console.log("File cut successfully.");
+          resolve();
+        });
+      });
+    });
+  },
 };
