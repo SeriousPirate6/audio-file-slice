@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const ffmpeg = require("fluent-ffmpeg");
-const { stringSanitizer } = require("./utils/string-sanitizer");
+const { stringSanitizer } = require("./utils/string");
 
 module.exports = {
   sliceAndTag: async ({ inputPath, outputPath, metadata }) => {
@@ -24,32 +24,40 @@ module.exports = {
         .outputOptions([
           "-metadata",
           `title=${
-            metadata.title.indexOf(" ") !== -1
-              ? metadata.title + " " // trailing space to avoid crash in case of name with spaces in between
-              : metadata.title
+            metadata.title
+              ? metadata.title.indexOf(" ") !== -1
+                ? metadata.title + " " // trailing space to avoid crash in case of name with spaces in between
+                : metadata.title
+              : ""
           }`,
           "-metadata",
           `artist=${
-            metadata.artist.indexOf(" ") !== -1
-              ? metadata.artist + " "
-              : metadata.artist
+            metadata.artist
+              ? metadata.artist.indexOf(" ") !== -1
+                ? metadata.artist + " "
+                : metadata.artist
+              : ""
           }`,
           "-metadata",
           `album=${
-            metadata.album.indexOf(" ") !== -1
-              ? metadata.album + " "
-              : metadata.album
+            metadata.album
+              ? metadata.album.indexOf(" ") !== -1
+                ? metadata.album + " "
+                : metadata.album
+              : ""
           }`,
           "-metadata",
           `genre=${
-            metadata.genre.indexOf(" ") !== -1
-              ? metadata.genre + " "
-              : metadata.genre
+            metadata.genre
+              ? metadata.genre.indexOf(" ") !== -1
+                ? metadata.genre + " "
+                : metadata.genre
+              : ""
           }`,
           "-metadata",
           `track=${metadata.track_number}`,
           "-metadata",
-          `year=${metadata.year}`,
+          `year=${metadata.year ? metadata.year : ""}`,
         ])
         .output(`${outputPath}/${file_name}`)
         .on("end", function () {

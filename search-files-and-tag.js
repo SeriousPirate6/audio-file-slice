@@ -7,7 +7,12 @@ module.exports = {
     const all_files = listFilesRecursively({ folder_path });
 
     const cueFile = all_files.find((e) => e.file_extension === ".cue");
-    const audioFiles = all_files.filter((e) => e.file_extension === ".flac");
+    const audioFiles = all_files.filter(
+      (e) =>
+        e.file_extension === ".flac" ||
+        e.file_extension === ".wav" ||
+        e.file_extension === ".ape"
+    );
     let coverImage = all_files.find(
       (e) =>
         (e.file_extension === ".png" ||
@@ -21,7 +26,7 @@ module.exports = {
     );
 
     if (audioFiles === undefined) {
-      console.log("Files .flac not found.");
+      console.log("Audio files not found.");
       return;
     }
     if (coverImage === undefined) {
@@ -29,7 +34,7 @@ module.exports = {
 
       const imageUrl = await getImageFromTrack({
         filePath: audioFiles[0].file_path,
-        cueFilePath: cueFile.file_path,
+        cueFilePath: cueFile?.file_path,
       });
 
       if (!imageUrl) return;

@@ -5,8 +5,10 @@ const { readCue } = require("./read-cue");
 const { tagCoverImage } = require("./tag-cover");
 const constants = require("./constants/constants");
 const { sliceAndTag } = require("./slice-and-tag");
+const { stringSanitizer } = require("./utils/string");
+const { convertToFlac } = require("./convert-to-flac");
 const { renameFolder, moveFile } = require("./utils/files");
-const { stringSanitizer } = require("./utils/string-sanitizer");
+const { isFlacFileByHeader } = require("./check-flac-file");
 const { searchTracksAndCover } = require("./search-files-and-tag");
 
 (async () => {
@@ -57,10 +59,24 @@ const { searchTracksAndCover } = require("./search-files-and-tag");
       let outputPath = path.dirname(folder_path);
 
       for await (track of audioFiles) {
+        let filePath = track.file_path;
+
+        if (!isFlacFileByHeader(track.file_path)) {
+          console.log(
+            `Detected audio file: ${track.file_extension}.\nConverting it to FLAC...`
+          );
+          filePath = await convertToFlac({
+            fileInput: track.file_path,
+            fileOutput: path.join(track.folder_path, `${track.file_name}.flac`),
+          });
+        }
+
         const full_metadata = await readCue({
           cueFilePath: cueFile.file_path,
           audioFile: track,
         });
+
+        if (!full_metadata) continue;
 
         // TODO extract to an external function create subfolder logic;
         // create a new "lighter" version of read cue that fetches only the album's property;
@@ -84,7 +100,7 @@ const { searchTracksAndCover } = require("./search-files-and-tag");
 
         for await (metadata of full_metadata.tracks) {
           const audioPath = await sliceAndTag({
-            inputPath: track.file_path,
+            inputPath: filePath,
             outputPath,
             metadata,
           });
